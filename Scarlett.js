@@ -19,42 +19,25 @@ const mapaUsuarios = new Map();
 
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
-const browser = await puppeteer.launch({
-  headless: false, // ← CLAVE
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-gpu=false',
-    '--enable-webgl',
-    '--ignore-gpu-blacklist',
-    '--window-size=1366,768'
-  ],
-  defaultViewport: {
-    width: 1366,
-    height: 768
-  }
-});
-
+    const browser = await puppeteer.launch({
+        headless: true, // Visible
+        defaultViewport: null,
+        args: ["--no-sandbox", "--disable-setuid-sandbox", 
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-blink-features=AutomationControlled', // Ayuda a que Brave no se sienta "lento" por ser detectado como bot
+            '--incognito', // Evita conflictos con sesiones previas
+            '--disable-extensions' // Brave carga varias extensiones internas que pueden pesar
+        ]
+    });
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
 const pages = await browser.pages();
 // 2. Usamos la primera que ya existe en lugar de crear una nueva
 const page = pages[0]; 
 
-  // --- ESTO ES LO QUE FALTA ---
-await page.evaluateOnNewDocument(() => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => false });
-});
-  
-// Añade esta línea:
-await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
-  
     // --- Inicio de sesiÃ³n ---
-await page.goto(
-  'https://es.imvu.com/next/chat/room-113425628-5/',
-  { waitUntil: 'domcontentloaded', timeout: 60000 }
-);
-
+await page.goto('https://es.imvu.com/next/chat/room-113425628-5/', { waitUntil: 'networkidle2' });
 
 await page.waitForSelector('li.sign-in a.login-link', { visible: true });
 await page.click('li.sign-in a.login-link');
@@ -64,87 +47,19 @@ await page.type('input[name="avatarname"]', IMVU_EMAIL, { delay: 100 });
 await page.type('input[name="password"]', IMVU_PASSWORD, { delay: 100 });
 await page.click('button.btn.btn-primary');
 
-  // ... después de page.goto ...
-console.log("URL actual:", page.url());
-const titulo = await page.title();
-console.log("Título de la página:", titulo);
+try { 
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }); 
+} catch {}
 
-if (titulo.includes("Access Denied") || titulo.includes("Attention Required")) {
-    console.log("❌ IMVU nos ha bloqueado o pide Captcha");
-}
-  
-  await page.screenshot({ path: 'debug.png' });
-console.log("Captura de pantalla guardada para debug");
-  
-
-// 🔹 JOIN automático con búsqueda en iframes (Railway FIX)
-
-let unidoASala = false;
-
-while (!unidoASala) {
-
-    console.log("⏳ Buscando botón JOIN (documento principal + iframes)...");
-
-    let joinEncontrado = false;
-
-    // 1️⃣ Revisar documento principal
-    let joinBtn = await page.$('footer .join-cta');
-
-    if (!joinBtn) {
-        // 2️⃣ Revisar TODOS los iframes
-        const frames = page.frames();
-
-        for (const frame of frames) {
-            try {
-                joinBtn = await frame.$('footer .join-cta');
-                if (joinBtn) {
-                    console.log("✅ Botón JOIN encontrado dentro de iframe");
-                    await frame.evaluate(() => {
-                        const btn = document.querySelector('footer .join-cta');
-                        btn.scrollIntoView({ block: 'center' });
-                        btn.click();
-                    });
-                    joinEncontrado = true;
-                    break;
-                }
-            } catch {}
-        }
-    } else {
-        console.log("✅ Botón JOIN encontrado en documento principal");
-        await page.evaluate(() => {
-            const btn = document.querySelector('footer .join-cta');
-            btn.scrollIntoView({ block: 'center' });
-            btn.click();
-        });
-        joinEncontrado = true;
+ // ðŸ”¹ FIX para el botÃ³n "UNIRSE"
+await page.waitForSelector('footer .join-cta', { visible: true });
+await page.evaluate(() => {
+    const btn = document.querySelector('footer .join-cta');
+    if (btn) {
+        btn.scrollIntoView();
+        btn.click();
     }
-
-    if (joinEncontrado) {
-        await delay(10000);
-
-        // Confirmación REAL: el footer desaparece al entrar
-        const sigueBtn = await page.$('footer .join-cta');
-        if (!sigueBtn) {
-            console.log("🟢 JOIN exitoso, dentro de la sala.");
-            unidoASala = true;
-            break;
-        } else {
-            console.log("⚠️ Click hecho, pero aún no entra.");
-        }
-    } else {
-        console.log("⚠️ Botón JOIN no existe aún en ningún frame.");
-    }
-
-    // Simular actividad humana
-    await page.mouse.move(300, 300);
-    await page.mouse.move(600, 500);
-    await page.keyboard.press('Tab');
-
-    console.log("⏲ Reintentando JOIN en 30 segundos...");
-    await delay(30000);
-}
-
-
+});
 
 await delay(5000);
 
@@ -234,8 +149,4 @@ function lanzarBot() {
 // Si Node intenta relanzarse a sÃ­ mismo y el BAT tambiÃ©n, podrÃ­as tener procesos duplicados.
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
 
-
 lanzarBot();
-
-
-
