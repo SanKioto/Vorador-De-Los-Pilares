@@ -34,7 +34,6 @@ const pages = await browser.pages();
 // 2. Usamos la primera que ya existe en lugar de crear una nueva
 const page = pages[0]; 
 
-const page = await browser.newPage();
 // Añade esta línea:
 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
   
@@ -49,6 +48,9 @@ await page.type('input[name="avatarname"]', IMVU_EMAIL, { delay: 100 });
 await page.type('input[name="password"]', IMVU_PASSWORD, { delay: 100 });
 await page.click('button.btn.btn-primary');
 
+  await page.screenshot({ path: 'debug.png' });
+console.log("Captura de pantalla guardada para debug");
+  
 try { 
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }); 
 } catch {}
@@ -153,4 +155,5 @@ function lanzarBot() {
 
 
 lanzarBot();
+
 
