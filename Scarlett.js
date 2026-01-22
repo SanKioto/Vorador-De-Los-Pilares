@@ -34,6 +34,10 @@ const pages = await browser.pages();
 // 2. Usamos la primera que ya existe en lugar de crear una nueva
 const page = pages[0]; 
 
+const page = await browser.newPage();
+// Añade esta línea:
+await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
+  
     // --- Inicio de sesiÃ³n ---
 await page.goto('https://es.imvu.com/next/chat/room-113425628-5/', { waitUntil: 'networkidle2' });
 
@@ -149,3 +153,4 @@ function lanzarBot() {
 
 
 lanzarBot();
+
