@@ -17,28 +17,19 @@ const mensajesRespondidos = new Set();
 const usuariosRegistrados = new Set();
 const mapaUsuarios = new Map();
 
-// Añadir al inicio de Scarlett.js
-const http = require('http');
-http.createServer((req, res) => res.end('Bot vivo')).listen(process.env.PORT || 3000);
-
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
-const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport: { width: 800, height: 600 }, // Forzar resolución baja ahorra RAM
-    args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", 
-        "--disable-gpu",            // Desactiva aceleración gráfica
-        "--no-zygote",              // Evita procesos hijos extra
-        "--single-process",         // Obliga a Chrome a usar un solo proceso (Ahorro clave)
-        "--disable-extensions",
-        "--disable-canvas-aa",      // Desactiva antialiasing
-        "--disable-2d-canvas-clip-utils",
-        "--disable-gl-drawing-for-tests"
-    ]
-});
+    const browser = await puppeteer.launch({
+        headless: true, // Visible
+        defaultViewport: null,
+        args: ["--no-sandbox", "--disable-setuid-sandbox", 
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-blink-features=AutomationControlled', // Ayuda a que Brave no se sienta "lento" por ser detectado como bot
+            '--incognito', // Evita conflictos con sesiones previas
+            '--disable-extensions' // Brave carga varias extensiones internas que pueden pesar
+        ]
+    });
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
 const pages = await browser.pages();
@@ -46,11 +37,7 @@ const pages = await browser.pages();
 const page = pages[0]; 
 
     // --- Inicio de sesiÃ³n ---
-// Cambia la línea 40 (aprox) por esta:
-await page.goto('https://es.imvu.com/next/chat/room-113461380-8//', { 
-    waitUntil: 'domcontentloaded', // Menos estricto que networkidle2
-    timeout: 90000                 // Aumentamos a 90 segundos
-});
+await page.goto('https://es.imvu.com/next/chat/room-113425628-5/', { waitUntil: 'networkidle2' });
 
 await page.waitForSelector('li.sign-in a.login-link', { visible: true });
 await page.click('li.sign-in a.login-link');
@@ -163,7 +150,3 @@ function lanzarBot() {
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
 
 lanzarBot();
-
-
-
-
