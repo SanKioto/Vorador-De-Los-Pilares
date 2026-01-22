@@ -19,17 +19,15 @@ const mapaUsuarios = new Map();
 
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
-    const browser = await puppeteer.launch({
-        headless: true, // Visible
-        defaultViewport: null,
-        args: ["--no-sandbox", "--disable-setuid-sandbox", 
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled', // Ayuda a que Brave no se sienta "lento" por ser detectado como bot
-            '--incognito', // Evita conflictos con sesiones previas
-            '--disable-extensions' // Brave carga varias extensiones internas que pueden pesar
-        ]
-    });
+const browser = await puppeteer.launch({
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--single-process'
+  ],
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null 
+});
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
 const pages = await browser.pages();
@@ -148,5 +146,6 @@ function lanzarBot() {
 // NOTA: He eliminado el process.on('exit') interno porque tienes el Scarlet.bat.
 // Si Node intenta relanzarse a sÃ­ mismo y el BAT tambiÃ©n, podrÃ­as tener procesos duplicados.
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
+
 
 lanzarBot();
