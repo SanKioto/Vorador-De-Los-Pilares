@@ -20,14 +20,21 @@ const mapaUsuarios = new Map();
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
 const browser = await puppeteer.launch({
-  headless: "new",
+  headless: false, // ← CLAVE
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-blink-features=AutomationControlled', // Quita la marca de bot
-    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-  ]
+    '--disable-gpu=false',
+    '--enable-webgl',
+    '--ignore-gpu-blacklist',
+    '--window-size=1366,768'
+  ],
+  defaultViewport: {
+    width: 1366,
+    height: 768
+  }
 });
+
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
 const pages = await browser.pages();
