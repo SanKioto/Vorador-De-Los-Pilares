@@ -19,17 +19,22 @@ const mapaUsuarios = new Map();
 
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
-    const browser = await puppeteer.launch({
-        headless: true, // Visible
-        defaultViewport: null,
-        args: ["--no-sandbox", "--disable-setuid-sandbox", 
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled', // Ayuda a que Brave no se sienta "lento" por ser detectado como bot
-            '--incognito', // Evita conflictos con sesiones previas
-            '--disable-extensions' // Brave carga varias extensiones internas que pueden pesar
-        ]
-    });
+const browser = await puppeteer.launch({
+    headless: true,
+    defaultViewport: { width: 800, height: 600 }, // Forzar resolución baja ahorra RAM
+    args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage", 
+        "--disable-gpu",            // Desactiva aceleración gráfica
+        "--no-zygote",              // Evita procesos hijos extra
+        "--single-process",         // Obliga a Chrome a usar un solo proceso (Ahorro clave)
+        "--disable-extensions",
+        "--disable-canvas-aa",      // Desactiva antialiasing
+        "--disable-2d-canvas-clip-utils",
+        "--disable-gl-drawing-for-tests"
+    ]
+});
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
 const pages = await browser.pages();
@@ -154,5 +159,6 @@ function lanzarBot() {
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
 
 lanzarBot();
+
 
 
