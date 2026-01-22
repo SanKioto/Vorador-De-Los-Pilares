@@ -20,7 +20,7 @@ const mapaUsuarios = new Map();
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
 const browser = await puppeteer.launch({
-  headless: false, // ← CLAVE
+  headless: true, // ← CLAVE
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -236,4 +236,5 @@ function lanzarBot() {
 
 
 lanzarBot();
+
 
