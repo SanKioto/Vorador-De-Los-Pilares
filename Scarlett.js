@@ -17,6 +17,10 @@ const mensajesRespondidos = new Set();
 const usuariosRegistrados = new Set();
 const mapaUsuarios = new Map();
 
+// Añadir al inicio de Scarlett.js
+const http = require('http');
+http.createServer((req, res) => res.end('Bot vivo')).listen(process.env.PORT || 3000);
+
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
 const browser = await puppeteer.launch({
@@ -159,6 +163,7 @@ function lanzarBot() {
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
 
 lanzarBot();
+
 
 
 
