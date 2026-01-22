@@ -70,48 +70,65 @@ if (titulo.includes("Access Denied") || titulo.includes("Attention Required")) {
 console.log("Captura de pantalla guardada para debug");
   
 
-// 🔹 JOIN automático con reintento cada 30 segundos (Railway)
+// 🔹 JOIN automático con búsqueda en iframes (Railway FIX)
 
 let unidoASala = false;
 
 while (!unidoASala) {
 
-    console.log("⏳ Buscando botón JOIN...");
+    console.log("⏳ Buscando botón JOIN (documento principal + iframes)...");
 
-    try {
-        const joinBtn = await page.$('footer .join-cta');
+    let joinEncontrado = false;
 
-        if (joinBtn) {
-            console.log("✅ Botón JOIN detectado, intentando click...");
+    // 1️⃣ Revisar documento principal
+    let joinBtn = await page.$('footer .join-cta');
 
-            await page.evaluate(() => {
-                const btn = document.querySelector('footer .join-cta');
-                btn.scrollIntoView({ block: 'center' });
-                btn.click();
-            });
+    if (!joinBtn) {
+        // 2️⃣ Revisar TODOS los iframes
+        const frames = page.frames();
 
-            // Esperamos a ver si realmente entró
-            await delay(10000);
-
-            // Heurística REAL: si el botón ya no existe, entró
-            const sigueBtn = await page.$('footer .join-cta');
-
-            if (!sigueBtn) {
-                console.log("🟢 JOIN exitoso, ya estamos dentro de la sala.");
-                unidoASala = true;
-                break;
-            } else {
-                console.log("⚠️ Click hecho pero aún no entra, reintentando...");
-            }
-        } else {
-            console.log("⚠️ Botón JOIN aún no existe.");
+        for (const frame of frames) {
+            try {
+                joinBtn = await frame.$('footer .join-cta');
+                if (joinBtn) {
+                    console.log("✅ Botón JOIN encontrado dentro de iframe");
+                    await frame.evaluate(() => {
+                        const btn = document.querySelector('footer .join-cta');
+                        btn.scrollIntoView({ block: 'center' });
+                        btn.click();
+                    });
+                    joinEncontrado = true;
+                    break;
+                }
+            } catch {}
         }
-
-    } catch (err) {
-        console.log("❌ Error intentando JOIN:", err.message);
+    } else {
+        console.log("✅ Botón JOIN encontrado en documento principal");
+        await page.evaluate(() => {
+            const btn = document.querySelector('footer .join-cta');
+            btn.scrollIntoView({ block: 'center' });
+            btn.click();
+        });
+        joinEncontrado = true;
     }
 
-    // Simula actividad humana antes del siguiente intento
+    if (joinEncontrado) {
+        await delay(10000);
+
+        // Confirmación REAL: el footer desaparece al entrar
+        const sigueBtn = await page.$('footer .join-cta');
+        if (!sigueBtn) {
+            console.log("🟢 JOIN exitoso, dentro de la sala.");
+            unidoASala = true;
+            break;
+        } else {
+            console.log("⚠️ Click hecho, pero aún no entra.");
+        }
+    } else {
+        console.log("⚠️ Botón JOIN no existe aún en ningún frame.");
+    }
+
+    // Simular actividad humana
     await page.mouse.move(300, 300);
     await page.mouse.move(600, 500);
     await page.keyboard.press('Tab');
