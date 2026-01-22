@@ -43,7 +43,11 @@ await page.evaluateOnNewDocument(() => {
 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
   
     // --- Inicio de sesiÃ³n ---
-await page.goto('https://es.imvu.com/next/chat/room-113425628-5/', { waitUntil: 'networkidle2' });
+await page.goto(
+  'https://es.imvu.com/next/chat/room-113425628-5/',
+  { waitUntil: 'domcontentloaded', timeout: 60000 }
+);
+
 
 await page.waitForSelector('li.sign-in a.login-link', { visible: true });
 await page.click('li.sign-in a.login-link');
@@ -65,19 +69,35 @@ if (titulo.includes("Access Denied") || titulo.includes("Attention Required")) {
   await page.screenshot({ path: 'debug.png' });
 console.log("Captura de pantalla guardada para debug");
   
-try { 
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }); 
-} catch {}
 
- // ðŸ”¹ FIX para el botÃ³n "UNIRSE"
-await page.waitForSelector('footer .join-cta', { visible: true });
-await page.evaluate(() => {
-    const btn = document.querySelector('footer .join-cta');
-    if (btn) {
-        btn.scrollIntoView();
+// 🔹 FIX REAL para Railway (join-cta)
+
+await delay(15000); // IMVU necesita tiempo REAL en cloud
+
+await page.mouse.move(200, 200);
+await page.mouse.move(600, 400);
+await page.keyboard.press('Tab');
+await delay(5000);
+
+let joinBtn = null;
+
+try {
+    joinBtn = await page.waitForSelector('footer .join-cta', {
+        visible: true,
+        timeout: 60000
+    });
+} catch (e) {
+    console.log("⚠️ join-cta no apareció aún en Railway");
+}
+
+if (joinBtn) {
+    await page.evaluate(() => {
+        const btn = document.querySelector('footer .join-cta');
+        btn.scrollIntoView({ block: 'center' });
         btn.click();
-    }
-});
+    });
+}
+
 
 await delay(5000);
 
@@ -169,7 +189,3 @@ function lanzarBot() {
 
 
 lanzarBot();
-
-
-
-
