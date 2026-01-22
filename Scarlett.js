@@ -70,33 +70,56 @@ if (titulo.includes("Access Denied") || titulo.includes("Attention Required")) {
 console.log("Captura de pantalla guardada para debug");
   
 
-// 🔹 FIX REAL para Railway (join-cta)
+// 🔹 JOIN automático con reintento cada 30 segundos (Railway)
 
-await delay(15000); // IMVU necesita tiempo REAL en cloud
+let unidoASala = false;
 
-await page.mouse.move(200, 200);
-await page.mouse.move(600, 400);
-await page.keyboard.press('Tab');
-await delay(5000);
+while (!unidoASala) {
 
-let joinBtn = null;
+    console.log("⏳ Buscando botón JOIN...");
 
-try {
-    joinBtn = await page.waitForSelector('footer .join-cta', {
-        visible: true,
-        timeout: 60000
-    });
-} catch (e) {
-    console.log("⚠️ join-cta no apareció aún en Railway");
+    try {
+        const joinBtn = await page.$('footer .join-cta');
+
+        if (joinBtn) {
+            console.log("✅ Botón JOIN detectado, intentando click...");
+
+            await page.evaluate(() => {
+                const btn = document.querySelector('footer .join-cta');
+                btn.scrollIntoView({ block: 'center' });
+                btn.click();
+            });
+
+            // Esperamos a ver si realmente entró
+            await delay(10000);
+
+            // Heurística REAL: si el botón ya no existe, entró
+            const sigueBtn = await page.$('footer .join-cta');
+
+            if (!sigueBtn) {
+                console.log("🟢 JOIN exitoso, ya estamos dentro de la sala.");
+                unidoASala = true;
+                break;
+            } else {
+                console.log("⚠️ Click hecho pero aún no entra, reintentando...");
+            }
+        } else {
+            console.log("⚠️ Botón JOIN aún no existe.");
+        }
+
+    } catch (err) {
+        console.log("❌ Error intentando JOIN:", err.message);
+    }
+
+    // Simula actividad humana antes del siguiente intento
+    await page.mouse.move(300, 300);
+    await page.mouse.move(600, 500);
+    await page.keyboard.press('Tab');
+
+    console.log("⏲ Reintentando JOIN en 30 segundos...");
+    await delay(30000);
 }
 
-if (joinBtn) {
-    await page.evaluate(() => {
-        const btn = document.querySelector('footer .join-cta');
-        btn.scrollIntoView({ block: 'center' });
-        btn.click();
-    });
-}
 
 
 await delay(5000);
@@ -189,3 +212,4 @@ function lanzarBot() {
 
 
 lanzarBot();
+
