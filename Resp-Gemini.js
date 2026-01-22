@@ -6,7 +6,7 @@ const respGrimorio = require('./Resp-Grimorio'); // <--- IntegraciÃ³n con tu G
 dotenv.config();
 
 // CONFIGURACIÃ“N MANUAL DE API KEY (No lee del .env)
-const apiKey = "AIzaSyAdEpdkNEMjx-m4jarK4CAwxoBvUmjKx0c"; 
+const apiKey = "LA API KEY LA PEGAMOS AQUI DESDE LA CONSOLA"; 
 
 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 const memoriaPath = path.join(__dirname, 'memoria.json');
@@ -131,5 +131,6 @@ async function obtenerRespuestaGemini(usuario, mensajeUsuario) {
         return "Parece que algo interrumpiÃ³ nuestra conexiÃ³n...";
     }
 }
+
 
 module.exports = { obtenerRespuestaGemini };
