@@ -37,7 +37,7 @@ const pages = await browser.pages();
 const page = pages[0]; 
 
     // --- Inicio de sesiÃ³n ---
-await page.goto('https://es.imvu.com/next/chat/room-113425628-5/', { waitUntil: 'networkidle2' });
+await page.goto('https://es.imvu.com/next/chat/room-113461380-8//', { waitUntil: 'networkidle2' });
 
 await page.waitForSelector('li.sign-in a.login-link', { visible: true });
 await page.click('li.sign-in a.login-link');
@@ -150,3 +150,4 @@ function lanzarBot() {
 // Al usar process.exit(0), el BAT verÃ¡ que terminÃ³ y lo ejecutarÃ¡ de nuevo.
 
 lanzarBot();
+
