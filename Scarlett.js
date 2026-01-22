@@ -20,13 +20,13 @@ const mapaUsuarios = new Map();
 // --- FunciÃ³n de login y apertura de Edge ---
 async function iniciarBot(IMVU_EMAIL, IMVU_PASSWORD) {
 const browser = await puppeteer.launch({
+  headless: "new",
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--single-process'
-  ],
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null 
+    '--disable-blink-features=AutomationControlled', // Quita la marca de bot
+    '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+  ]
 });
 
   // 1. Obtenemos todas las pÃ¡ginas abiertas (que serÃ¡ solo la inicial en blanco)
@@ -53,6 +53,15 @@ await page.type('input[name="avatarname"]', IMVU_EMAIL, { delay: 100 });
 await page.type('input[name="password"]', IMVU_PASSWORD, { delay: 100 });
 await page.click('button.btn.btn-primary');
 
+  // ... después de page.goto ...
+console.log("URL actual:", page.url());
+const titulo = await page.title();
+console.log("Título de la página:", titulo);
+
+if (titulo.includes("Access Denied") || titulo.includes("Attention Required")) {
+    console.log("❌ IMVU nos ha bloqueado o pide Captcha");
+}
+  
   await page.screenshot({ path: 'debug.png' });
 console.log("Captura de pantalla guardada para debug");
   
@@ -160,6 +169,7 @@ function lanzarBot() {
 
 
 lanzarBot();
+
 
 
 
