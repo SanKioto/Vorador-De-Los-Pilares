@@ -2,12 +2,12 @@
   "name": "vorador-de-los-pilares",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js", 
+  "main": "Scarlett.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node Scarlett.js"
   },
   "dependencies": {
-    "puppeteer": "^...",
-    "dotenv": "^..."
+    "puppeteer": "latest",
+    "dotenv": "latest"
   }
 }
