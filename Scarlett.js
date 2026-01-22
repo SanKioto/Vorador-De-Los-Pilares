@@ -34,6 +34,11 @@ const pages = await browser.pages();
 // 2. Usamos la primera que ya existe en lugar de crear una nueva
 const page = pages[0]; 
 
+  // --- ESTO ES LO QUE FALTA ---
+await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => false });
+});
+  
 // Añade esta línea:
 await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36');
   
@@ -155,5 +160,6 @@ function lanzarBot() {
 
 
 lanzarBot();
+
 
 
